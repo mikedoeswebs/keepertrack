@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -26,6 +28,13 @@ export default function ContactPage() {
     setSubmitStatus('idle')
     setErrorMessage('')
 
+    if (!turnstileToken) {
+      setErrorMessage('Please complete the security verification.')
+      setSubmitStatus('error')
+      setIsSubmitting(false)
+      return
+    }
+
     try {
       console.log('Submitting form data:', formData)
       const response = await fetch('/api/contact', {
@@ -33,12 +42,16 @@ export default function ContactPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          turnstileToken
+        }),
       })
 
       if (response.ok) {
         setSubmitStatus('success')
         setFormData({ name: '', email: '', message: '' })
+        setTurnstileToken('')
       } else {
         const errorData = await response.json()
         setErrorMessage(errorData.error || 'An error occurred')
@@ -125,9 +138,22 @@ export default function ContactPage() {
               />
             </div>
 
+            <div className="flex justify-center">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                onSuccess={setTurnstileToken}
+                onError={() => setTurnstileToken('')}
+                onExpire={() => setTurnstileToken('')}
+                options={{
+                  theme: 'light',
+                  size: 'normal'
+                }}
+              />
+            </div>
+
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !turnstileToken}
               className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isSubmitting ? 'Sending...' : 'Send Message'}

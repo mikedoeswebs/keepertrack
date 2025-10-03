@@ -6,13 +6,44 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('Received form data:', body)
     
-    const { name, email, message } = body
+    const { name, email, message, turnstileToken } = body
 
     // Basic validation
     if (!name || !email || !message) {
       console.log('Validation failed:', { name: !!name, email: !!email, message: !!message })
       return NextResponse.json(
         { error: 'All fields are required' },
+        { status: 400 }
+      )
+    }
+
+    // Turnstile verification
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: 'Security verification required' },
+        { status: 400 }
+      )
+    }
+
+    // Verify Turnstile token
+    const turnstileResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        secret: process.env.TURNSTILE_SECRET_KEY || '',
+        response: turnstileToken,
+        remoteip: request.ip || request.headers.get('x-forwarded-for') || '',
+      }),
+    })
+
+    const turnstileResult = await turnstileResponse.json()
+    
+    if (!turnstileResult.success) {
+      console.log('Turnstile verification failed:', turnstileResult)
+      return NextResponse.json(
+        { error: 'Security verification failed' },
         { status: 400 }
       )
     }
