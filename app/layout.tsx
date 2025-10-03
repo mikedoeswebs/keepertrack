@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Contact Form',
-  description: 'Get in touch with us',
+  title: 'KeeperTrack.co.uk is for sale',
+  description: 'Get in touch if you are interested in buying KeeperTrack.co.uk',
 }
 
 export default function RootLayout({
