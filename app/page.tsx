@@ -10,6 +10,7 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -23,8 +24,10 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitStatus('idle')
+    setErrorMessage('')
 
     try {
+      console.log('Submitting form data:', formData)
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
@@ -37,9 +40,13 @@ export default function ContactPage() {
         setSubmitStatus('success')
         setFormData({ name: '', email: '', message: '' })
       } else {
+        const errorData = await response.json()
+        setErrorMessage(errorData.error || 'An error occurred')
         setSubmitStatus('error')
       }
     } catch (error) {
+      console.error('Form submission error:', error)
+      setErrorMessage('Network error. Please try again.')
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
@@ -63,7 +70,9 @@ export default function ContactPage() {
 
           {submitStatus === 'error' && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-800 text-center">Sorry, there was an error sending your message. Please try again.</p>
+              <p className="text-red-800 text-center">
+                {errorMessage || 'Sorry, there was an error sending your message. Please try again.'}
+              </p>
             </div>
           )}
 

@@ -3,10 +3,14 @@ import nodemailer from 'nodemailer'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, message } = await request.json()
+    const body = await request.json()
+    console.log('Received form data:', body)
+    
+    const { name, email, message } = body
 
     // Basic validation
     if (!name || !email || !message) {
+      console.log('Validation failed:', { name: !!name, email: !!email, message: !!message })
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -19,6 +23,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Invalid email address' },
         { status: 400 }
+      )
+    }
+
+    // Check required environment variables
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.CONTACT_EMAIL) {
+      console.error('Missing required environment variables')
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
       )
     }
 
