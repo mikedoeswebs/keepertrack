@@ -3,10 +3,10 @@ import nodemailer from 'nodemailer'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, subject, message } = await request.json()
+    const { name, email, message } = await request.json()
 
     // Basic validation
-    if (!name || !email || !subject || !message) {
+    if (!name || !email || !message) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     const mailOptions = {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to: process.env.CONTACT_EMAIL,
-      subject: `Contact Form: ${subject}`,
+      subject: 'Domain offer - keepertrack.co.uk',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333; border-bottom: 2px solid #3b82f6; padding-bottom: 10px;">
@@ -48,7 +48,6 @@ export async function POST(request: NextRequest) {
             <h3 style="color: #374151; margin-top: 0;">Contact Details</h3>
             <p><strong>Name:</strong> ${name}</p>
             <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Subject:</strong> ${subject}</p>
           </div>
           
           <div style="background: #ffffff; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
@@ -68,7 +67,6 @@ export async function POST(request: NextRequest) {
         
         Name: ${name}
         Email: ${email}
-        Subject: ${subject}
         
         Message:
         ${message}

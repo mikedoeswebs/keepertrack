@@ -6,7 +6,6 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    subject: '',
     message: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -36,7 +35,7 @@ export default function ContactPage() {
 
       if (response.ok) {
         setSubmitStatus('success')
-        setFormData({ name: '', email: '', subject: '', message: '' })
+        setFormData({ name: '', email: '', message: '' })
       } else {
         setSubmitStatus('error')
       }
@@ -52,8 +51,8 @@ export default function ContactPage() {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Get in Touch</h1>
-            <p className="text-gray-600">Send us a message and we'll get back to you soon.</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">KeeperTrack.co.uk is for sale</h1>
+            <p className="text-gray-600">Send your details using the form below and we'll get back to you.</p>
           </div>
 
           {submitStatus === 'success' && (
@@ -102,22 +101,6 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                Subject *
-              </label>
-              <input
-                type="text"
-                id="subject"
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                placeholder="What's this about?"
-              />
-            </div>
-
-            <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                 Message *
               </label>
@@ -129,7 +112,7 @@ export default function ContactPage() {
                 required
                 rows={5}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
-                placeholder="Tell us more about your inquiry..."
+                placeholder="Tell us more about your enquiry..."
               />
             </div>
 
