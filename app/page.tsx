@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { Turnstile } from 'react-turnstile'
+import { useState, useEffect, useRef } from 'react'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -13,6 +12,40 @@ export default function ContactPage() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
+  const turnstileRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Load Turnstile script
+    const script = document.createElement('script')
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+    script.async = true
+    script.defer = true
+    document.head.appendChild(script)
+
+    script.onload = () => {
+      if (window.turnstile && turnstileRef.current) {
+        window.turnstile.render(turnstileRef.current, {
+          sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '',
+          callback: (token: string) => {
+            setTurnstileToken(token)
+          },
+          'error-callback': () => {
+            setTurnstileToken('')
+          },
+          'expired-callback': () => {
+            setTurnstileToken('')
+          }
+        })
+      }
+    }
+
+    return () => {
+      // Cleanup
+      if (window.turnstile && turnstileRef.current) {
+        window.turnstile.remove(turnstileRef.current)
+      }
+    }
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -139,16 +172,7 @@ export default function ContactPage() {
             </div>
 
             <div className="flex justify-center">
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
-                onSuccess={setTurnstileToken}
-                onError={() => setTurnstileToken('')}
-                onExpire={() => setTurnstileToken('')}
-                options={{
-                  theme: 'light',
-                  size: 'normal'
-                }}
-              />
+              <div ref={turnstileRef}></div>
             </div>
 
             <button
